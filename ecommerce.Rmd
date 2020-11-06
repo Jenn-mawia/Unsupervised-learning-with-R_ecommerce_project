@@ -323,11 +323,159 @@ Anomalies are inconsistencies in the data and this can be checked for in many wa
 Columns containing discrete data(categorical data) needs to be converted to its appropriate form- factor dataype. 
 
 ```{r}
+# to be revisited
+```
+
+# 9. Exploratory Data Analysis
+
+### 9.1 Univariate Data Analysis
+
+#### Measures of Central Tendency
+
+**9.1.1 Mean**
+
+Get the mean of all numerical columns
+
+```{r}
+# get numerical columns and save them on a new dataframe that will be used for analysis
+numerical <- ecommerce_unique[c(1,2,3,4,5,6,7,8,9,10)]
+# get the means of each column
+colMeans(numerical)
+```
+
+**9.1.2 Median**
+
+Get the median of all numerical columns
+
+```{r}
+apply (numerical, 2 ,median)
+```
+
+***9.1.3 Mode**
+
+**Administrative**
+
+```{r}
+# Create the function.
+getmode <- function(v) {
+uniqv <- unique(v)
+uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+# Calculate the mode using the user function.
+getmode (ecommerce_unique$administrative)
+```
+
+Most users visiting the site did not visit administrative types of pages. 
+
+**administrative_duration**
+
+```{r}
+getmode(ecommerce_unique$administrative_duration)
+```
+
+Since most users did not visit administrative page types, it is expected that the total time spent in this page category will be zero, which is true from the computed mode. 
+
+**Informational**
+
+```{r}
+getmode(ecommerce_unique$informational)
+```
+
+Here again, most users visiting the site did not visit a page related to informational category.
+
+**Informational duration**
+
+```{r}
+getmode(ecommerce_unique$informational_duration)
 
 ```
 
+As expected, the mode of the duration of time users take on pages related to the category "Informational" is zero.
 
+**Product Related**
 
+```{r}
+getmode(ecommerce_unique$product_related)
+
+```
+
+The modal number of pages that a user visits related to the category "Product" is 110. 
+
+**Product related duration**
+
+```{r}
+getmode(ecommerce_unique$product_related_duration)
+
+```
+
+The most occuring total time spent by a user on Product related page categories is 4312.682
+
+**Bounce Rates**
+
+```{r}
+getmode(ecommerce_unique$bounce_rates)
+
+```
+
+The modal percentage of visitors who enter the site from that page and then leave ("bounce") without triggering any other requests to the analytics server during that session is 0%.
+
+**Exit rates**
+
+```{r}
+getmode(ecommerce_unique$exit_rates)
+
+```
+
+For all pageviews to the page, the modal percentage that was the last in the session is 0.175
+
+**Page Values**
+
+```{r}
+getmode(ecommerce_unique$page_values)
+
+```
+
+The modal average value for a web page that a user visited before completing an e-commerce transaction is 0. 
+
+**Special Day**
+
+```{r}
+getmode(ecommerce_unique$special_day)
+
+```
+
+The modal value of closeness of the site visiting time to a specific special day (e.g. Mother’s Day, Valentine's Day) in which the sessions are more likely to be finalized with the transaction is 0. This shows that special days do not have a significant effect on determining whether a user will visit the site to make a purchase or not. 
+
+**Month**
+
+```{r}
+getmode(ecommerce_unique$month)
+
+```
+
+The modal month is May. It appears that most users visited the site during this month. Could it be because of a possible mid-year sale offered by the e-commerce site? 
+
+**Visitor Type**
+
+```{r}
+getmode(ecommerce_unique$visitor_type)
+
+```
+
+Most users visiting the site are "Returning Visitors". These are visitors who are not new to the site. 
+
+```{r}
+getmode(ecommerce_unique$weekend)
+
+```
+
+Most users visit the site during weekdays. 
+
+```{r}
+getmode(ecommerce_unique$revenue)
+```
+
+Most users visiting the site did not purchase and hence revenue was not made from most visits. 
 
 
 
