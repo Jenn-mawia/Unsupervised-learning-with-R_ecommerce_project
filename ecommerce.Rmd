@@ -651,28 +651,146 @@ Most of the data is skewed to the right.
 
 Since our target variable is Revenue, we will investigate its relationship with the other variables.  
 
+```{r}
+# how often does a user make a purchase on the site if he/she visits administrative pages
+adm_revenue_ <- table(ecommerce_unique$administrative, ecommerce_unique$revenue)
+names(dimnames(adm_revenue)) <- c ( "admin" , "revenue" )
+adm_revenue
+```
+
+Most site visits that did not result in revenue had most users visiting administrative pages.
+
+```{r}
+# does time spent on administrative pages result in purchase
+adm_duration_revenue <- table(ecommerce_unique$administrative_duration, ecommerce_unique$revenue)
+names(dimnames(adm_duration_revenue)) <- c ("admin duration" , "revenue")
+
+head(adm_duration_revenue)
+
+tail(adm_duration_revenue)
+```
+
+Most users that did not spend time on administrative pages made a purchase on the ecommerce site and resulted in revenue for the ecommerce company.
+
+```{r}
+# how often does a user make a purchase on the site if he/she visits informational pages
+info_revenue <- table(ecommerce_unique$informational, ecommerce_unique$revenue)
+names(dimnames(info_revenue)) <- c ( "informational" , "revenue" )
+info_revenue
+```
+
+Most site visitors who did not visit informational pages made a purchase and resulted in revenue for the ecommerce company. 
+
+```{r}
+# does time spent on informational pages result in revenue?
+info_duration_revenue <- table(ecommerce_unique$informational_duration, ecommerce_unique$revenue)
+names(dimnames(info_duration_revenue)) <- c ( "info duration" , "revenue" )
+info_duration_revenue
+```
+
+Most users who spent a lot of time on informational pages did not result in revenue for the ecommerce company while those who did not visit this category of pages made a purchase from the ecommerce site.
+
+```{r}
+# how often does a user make a purchase on the site if he/she visits product related pages
+prod_revenue <- table(ecommerce_unique$product_related, ecommerce_unique$revenue)
+names(dimnames(prod_revenue)) <- c ( "Prod_related" , "revenue" )
+prod_revenue
+```
+
+Product related pages 1-31 had the most number of visits in general and with the higher number of revenue returned. Page 110 also had a higher number of visits and more revenue from it was generated. 
+
+```{r}
+# does the duration of time spent on product related pages result in revenue?
+prod_duration_revenue <- table(ecommerce_unique$product_related_duration, ecommerce_unique$revenue)
+names(dimnames(prod_duration_revenue)) <- c ( "prod_duration" , "revenue" )
+# check the top of the dataframe
+head(prod_duration_revenue)
+# check the bottom of the dataframe
+tail(prod_duration_revenue)
+```
+Users who spent a lot of time on the ecommerce site on product related pages ended up bringing in revenue to the company. Users who did not spend time in these pages also brought revenue though not as much as those who spent a lot of time
+
+```{r}
+# how does bounce rate affect revenue?
+bounce_revenue <- table(ecommerce_unique$bounce_rates, ecommerce_unique$revenue)
+names(dimnames(bounce_revenue)) <- c ( "bounce_rates" , "revenue" )
+# check the top of the dataframe
+head(bounce_revenue)
+# check the bottom of the dataframe
+tail(bounce_revenue)
+```
+
+0% bounce rate resulted in more revenue for the ecommerce company. The highest percentage of 0.15% bounce rate also resulted in more revenue but not as much as the zero percentage. 
+
+```{r}
+# how does exit rate affect revenue?
+exit_revenue <- table(ecommerce_unique$exit_rates, ecommerce_unique$revenue)
+names(dimnames(exit_revenue)) <- c ( "exit_rates" , "revenue" )
+# check the top of the dataframe
+head(exit_revenue)
+# check the bottom of the dataframe
+tail(exit_revenue)
+```
+
+0% exit rate resulted in a higher revenue return for the ecommerce company. 
+
+```{r}
+# how does page value affect revenue?
+page_revenue <- table(ecommerce_unique$page_values, ecommerce_unique$revenue)
+names(dimnames(page_revenue)) <- c ( "page_values" , "revenue" )
+# check the top of the dataframe
+page_revenue
+```
+
+Pages with a higher page value resulted in higher revenue returns for the ecommerce company. 
+
+```{r}
+# how do special days affect revenue?
+special_revenue <- table(ecommerce_unique$special_day, ecommerce_unique$revenue)
+names(dimnames(special_revenue)) <- c ( "special_day" , "revenue" )
+# check the top of the dataframe
+special_revenue
+```
+
+There are fewer visits to the site on Special days, which results in less revenue for the ecommerce company. More revenue is generated on non special days indicated by 0. This is expected as special days occur very few times in a year.
+
+```{r}
+# Which months bring highest revenue?
+month_revenue <- table(ecommerce_unique$month, ecommerce_unique$revenue)
+names(dimnames(month_revenue)) <- c ( "month" , "revenue" )
+# check the top of the dataframe
+month_revenue
+```
+
+The month of May has the highest number of visits to the site, followed by November while February had the least number of visits. May however, does not result in a higher revenue as November does. It could be that more users make a lot of purchase to gift their loved ones over festivities such as Thanksgiving holiday, Christmas holiday, New year's holiday. 
+
+```{r}
+# how does visitor type affect revenue?
+visitor_revenue <- table(ecommerce_unique$visitor_type, ecommerce_unique$revenue)
+names(dimnames(visitor_revenue)) <- c ( "visitor_type" , "revenue" )
+# check the top of the dataframe
+visitor_revenue
+```
+
+Most users who are not new to the ecommerce site make purchases which result in more revenue generation by the ecommerce company. 
+
+```{r}
+# how does bounce rate affect revenue?
+weekend_revenue <- table(ecommerce_unique$weekend, ecommerce_unique$revenue)
+names(dimnames(weekend_revenue)) <- c ( "weekend" , "revenue" )
+# check the top of the dataframe
+weekend_revenue
+```
+
+More revenue is generated for site visits made during weekdays
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```{r}
+library(ggplot2)
+ggpairs(ecommerce_unique)
+```
 
 
 
