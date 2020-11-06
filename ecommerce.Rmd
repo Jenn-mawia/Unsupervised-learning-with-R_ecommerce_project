@@ -323,7 +323,6 @@ Anomalies are inconsistencies in the data and this can be checked for in many wa
 Columns containing discrete data(categorical data) needs to be converted to its appropriate form- factor dataype. 
 
 ```{r}
-#to be revisited
 
 ```
 
