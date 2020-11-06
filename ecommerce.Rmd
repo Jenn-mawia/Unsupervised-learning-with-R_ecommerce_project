@@ -1,0 +1,346 @@
+---
+title: "E-Commerce analysis with clustering"
+author: "Jenipher Mawia"
+date: "11/5/2020"
+output: html_document
+---
+
+# 1. Problem Definition
+
+## 1.1 Defining the question
+Perform clustering on the following data [link](http://bit.ly/EcommerceCustomersDataset) stating insights drawn from your analysis and visualizations drawn towards learning the characteristics of customer groups.
+
+## 1.2 Specifying the question
+Implement the solution using unsupervised learning techniques such as **K-means clustering** and **hierarchical clustering**.
+
+# 2. Defining the metrics for success
+This project will be considered a success if the following are achieved:
+- Unsupervised learning models are built (K-means and hierarchical clustering).
+- Insights are drawn from the EDA process and modeling.
+
+# 3. The Context
+[Kira Plastinina](https://kiraplastinina.ru/) is a Russian brand that is sold through a defunct chain of retail stores in Russia, Ukraine, Kazakhstan, Belarus, China, Philippines, and Armenia. The brand’s Sales and Marketing team would like to understand their customer’s behavior from data that they have collected over the past year. More specifically, they would like to learn the characteristics of customer groups.
+
+# 4. Experimental Design taken
+The following is the order in which I went about to achieve the objectives of this project:
+
+- Data Sourcing and Understanding
+- Checking the data (head and tail, shape(number of records), datatypes)
+- Data cleaning procedures (handling null values,outliers, anomalies)
+- Exploratory data analysis (Univariate, Bivariate and Multivariate analyses)
+- Implementing the solution(Clustering)
+- Conclusion and recommendation
+- Challenging the solution
+- Follow-up questions
+
+# 5. Data Sourcing
+The data used for this project was sourced from the following [website](https://kiraplastinina.ru/) and can be downloaded [here](http://bit.ly/EcommerceCustomersDataset)
+
+### Reading the data
+
+```{r}
+ecommerce <- read.csv("http://bit.ly/EcommerceCustomersDataset")
+```
+
+# 6. Checking the Data
+### checking the top of the data
+
+```{r}
+# checking the first 6 rows in the data
+head(ecommerce)
+```
+
+### checking the bottom of the data
+
+```{r}
+# checking the last 6 rows in the data
+tail(ecommerce)
+```
+
+### checking the shape of the data
+
+```{r}
+# checking the dimensions of the data (number of entries and fields)
+dim(ecommerce)
+```
+
+The data has 12330 entries and 18 columns. 
+
+### checking the datatypes of the column
+
+```{r}
+# getting the datatypes of each column
+str(ecommerce)
+```
+
+The data consists of integer, numeric, character and logical dataypes. The first 10 columns are numerical attributes while the last 8 columns are categorical attributes. 
+
+# 7. Appropriateness of the available data to answer the given question
+
+The data contains columns such as: 
+
+- "Administrative", "Administrative Duration", "Informational", "Informational Duration", "Product Related" and "Product Related Duration" represents the number of different types of pages visited by the visitor in that session and total time spent in each of these page categories. The values of these features are derived from the URL information of the pages visited by the user and updated in real-time when a user takes an action, e.g. moving from one page to another. 
+- The "Bounce Rate", "Exit Rate" and "Page Value" features represent the metrics measured by "Google Analytics" for each page in the e-commerce site. 
+- The value of the "Bounce Rate" feature for a web page refers to the percentage of visitors who enter the site from that page and then leave ("bounce") without triggering any other requests to the analytics server during that session. 
+- The value of the "Exit Rate" feature for a specific web page is calculated as for all pageviews to the page, the percentage that was the last in the session.
+- The "Page Value" feature represents the average value for a web page that a user visited before completing an e-commerce transaction. 
+- The "Special Day" feature indicates the closeness of the site visiting time to a specific special day (e.g. Mother’s Day, Valentine's Day) in which the sessions are more likely to be finalized with the transaction. The value of this attribute is determined by considering the dynamics of e-commerce such as the duration between the order date and delivery date. For example, for Valentina’s day, this value takes a nonzero value between February 2 and February 12, zero before and after this date unless it is close to another special day, and its maximum value of 1 on February 8. 
+- The dataset also includes the operating system, browser, region, traffic type, visitor type as returning or new visitor, a Boolean value indicating whether the date of the visit is weekend, and month of the year.
+
+All these fields are useful in learning the characteristics of customer groups and will play a great role in answering our research question. 
+
+Therefore, it can be concluded that the data available is appropriate and relevant to answer the given question.
+
+# 8. Data Cleaning
+
+### 8.1 Standardizing the column names to similar formatting
+
+From the above outputs, we can see that the column names are not in a standard/similar format. This needs to be addressed:
+
+```{r}
+# get the column names
+colnames(ecommerce)
+```
+
+```{r}
+# changing the column names to a standard format
+names(ecommerce)[names(ecommerce) == "Administrative"] <- "administrative"
+names(ecommerce)[names(ecommerce) == "Administrative_Duration"] <- "administrative_duration"
+names(ecommerce)[names(ecommerce) == "Informational"] <- "informational"
+names(ecommerce)[names(ecommerce) == "Informational_Duration"] <- "informational_duration"
+names(ecommerce)[names(ecommerce) == "ProductRelated"] <- "product_related"
+names(ecommerce)[names(ecommerce) == "ProductRelated_Duration"] <- "product_related_duration"
+names(ecommerce)[names(ecommerce) == "BounceRates"] <- "bounce_rates"
+names(ecommerce)[names(ecommerce) == "ExitRates"] <- "exit_rates"
+names(ecommerce)[names(ecommerce) == "PageValues"] <- "page_values"
+names(ecommerce)[names(ecommerce) == "SpecialDay"] <- "special_day"
+names(ecommerce)[names(ecommerce) == "Month"] <- "month"
+names(ecommerce)[names(ecommerce) == "OperatingSystems"] <- "operating_systems"
+names(ecommerce)[names(ecommerce) == "Browser"] <- "browser"
+names(ecommerce)[names(ecommerce) == "Region"] <- "region"
+names(ecommerce)[names(ecommerce) == "TrafficType"] <- "traffic_type"
+names(ecommerce)[names(ecommerce) == "VisitorType"] <- "visitor_type"
+names(ecommerce)[names(ecommerce) == "Weekend"] <- "weekend"
+names(ecommerce)[names(ecommerce) == "Revenue"] <- "revenue"
+```
+
+
+```{r}
+#confirm changes made
+colnames(ecommerce)
+```
+
+### 8.2 Duplicated entries
+
+```{r}
+#checking for duplicated entries
+duplicates <- ecommerce[duplicated(ecommerce),]
+duplicates
+```
+
+There is a total of 119 duplicated records in the data. We will remove them since duplicated  data may imply inaccurate reporting and thus lead to less informed decisions.
+
+```{r}
+# removing duplicated data
+ecommerce_unique <- unique(ecommerce)
+
+# confirming from the data for any duplicated records
+anyDuplicated(ecommerce_unique)
+```
+
+### 8.3 Missing data
+
+```{r}
+#check for missing data per column
+colSums(is.na(ecommerce_unique))
+```
+Since the missing values occur in the numerical columns only, they can be filled with the means of the columns
+```{r}
+# recode missing values with the means 
+ecommerce_unique$administrative[is.na(ecommerce_unique$administrative)] <- mean(ecommerce_unique$administrative, na.rm = TRUE)
+
+ecommerce_unique$administrative_duration[is.na(ecommerce_unique$administrative_duration)] <- mean(ecommerce_unique$administrative_duration, na.rm = TRUE)
+
+ecommerce_unique$informational[is.na(ecommerce_unique$informational)] <- mean(ecommerce_unique$informational, na.rm = TRUE)
+
+ecommerce_unique$informational_duration[is.na(ecommerce_unique$informational_duration)] <- mean(ecommerce_unique$informational_duration, na.rm = TRUE)
+
+ecommerce_unique$product_related[is.na(ecommerce_unique$product_related)] <- mean(ecommerce_unique$product_related, na.rm = TRUE)
+
+ecommerce_unique$product_related_duration[is.na(ecommerce_unique$product_related_duration)] <- mean(ecommerce_unique$product_related_duration, na.rm = TRUE)
+
+ecommerce_unique$bounce_rates[is.na(ecommerce_unique$bounce_rates)] <- mean(ecommerce_unique$bounce_rates, na.rm = TRUE)
+
+ecommerce_unique$exit_rates[is.na(ecommerce_unique$exit_rates)] <- mean(ecommerce_unique$exit_rates, na.rm = TRUE)
+```
+
+```{r}
+# confirm from the data for any more missing values
+colSums(is.na(ecommerce_unique))
+```
+
+### 8.4 Outliers
+
+These are data points that occur far away from the other points in the data. They could cause inconsistencies by distorting summaries of the distribution of values. We can screen for outliers by plotting boxplots of numerical columns in the data. 
+
+```{r}
+# get numerical columns in the data
+nums <- unlist(lapply(ecommerce_unique, is.numeric))
+nums
+```
+
+Out of the total 18 columns, there are 14 columns that contain numerical data. However, some of these columns are categorical in nature but do contain numerical data. 
+
+```{r}
+# output the numeric columns in form of a dataframe and check the top of the  resulting dataframe
+numeric_cols <- ecommerce_unique[ , nums]
+head(numeric_cols)
+```
+
+```{r}
+# make multiple boxplots of the numerical columns to check for any outliers present
+par ( mfrow= c (  2, 4 ))
+for (i in 1 : length (numeric_cols)) {
+boxplot (numeric_cols[,i], main= names (numeric_cols[i]), type= "l" )
+}
+```
+
+From the boxplots above, there are a couple number of outliers in the numeric columns
+
+
+```{r}
+colnames(ecommerce_unique)
+# checking to see the unique values of the categorical columns
+unique(ecommerce_unique$operating_systems)
+
+unique(ecommerce_unique$browser)
+
+unique(ecommerce_unique$region)
+
+unique(ecommerce_unique$traffic_type)
+
+unique(ecommerce_unique$special_day)
+
+```
+
+Since values in the categorical columns are discrete in nature, removing outliers will make a poor representation of the original data. Hence, we will only deal with the outliers in the numerical columns with continuos data. 
+
+#### 8.4.1 Dealing with outliers
+
+**Capping**
+
+```{r}
+# capping
+# administrative
+qnt <- quantile (ecommerce_unique$administrative, probs= c (.25 , .75 ), na.rm = T)
+caps <- quantile (ecommerce_unique$administrative, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$administrative, na.rm = T)
+ecommerce_unique$administrative[ecommerce_unique$administrative < (qnt[ 1 ] - H)] <- caps[ 1 ]
+ecommerce_unique$administrative[ecommerce_unique$administrative > (qnt[ 2 ] + H)] <- caps[ 2 ]
+
+# administrative_duration
+qnt1 <- quantile (ecommerce_unique$administrative_duration, probs= c (.25 , .75 ), na.rm = T)
+caps1 <- quantile (ecommerce_unique$administrative_duration, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$administrative_duration, na.rm = T)
+ecommerce_unique$administrative_duration[ecommerce_unique$administrative_duration < (qnt1[ 1 ] - H)] <- caps1[ 1 ]
+ecommerce_unique$administrative_duration[ecommerce_unique$administrative_duration > (qnt1[ 2 ] + H)] <- caps1[ 2 ]
+
+# informational
+qnt2 <- quantile (ecommerce_unique$informational, probs= c (.25 , .75 ), na.rm = T)
+caps2 <- quantile (ecommerce_unique$informational, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$informational, na.rm = T)
+ecommerce_unique$informational[ecommerce_unique$informational < (qnt2[ 1 ] - H)] <- caps2[ 1 ]
+ecommerce_unique$informational[ecommerce_unique$informational > (qnt2[ 2 ] + H)] <- caps2[ 2 ]
+
+# informational_duration
+qnt3 <- quantile (ecommerce_unique$informational_duration, probs= c (.25 , .75 ), na.rm = T)
+caps3 <- quantile (ecommerce_unique$informational_duration, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$informational_duration, na.rm = T)
+ecommerce_unique$informational_duration[ecommerce_unique$informational_duration < (qnt3[ 1 ] - H)] <- caps3[ 1 ]
+ecommerce_unique$informational_duration[ecommerce_unique$informational_duration > (qnt3[ 2 ] + H)] <- caps3[ 2 ]
+
+# product_related
+qnt4 <- quantile (ecommerce_unique$product_related, probs= c (.25 , .75 ), na.rm = T)
+caps4 <- quantile (ecommerce_unique$product_related, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$product_related, na.rm = T)
+ecommerce_unique$product_related[ecommerce_unique$product_related < (qnt4[ 1 ] - H)] <- caps4[ 1 ]
+ecommerce_unique$product_related[ecommerce_unique$product_related > (qnt4[ 2 ] + H)] <- caps4[ 2 ]
+
+# product_related_duration
+qnt5 <- quantile (ecommerce_unique$product_related_duration, probs= c (.25 , .75 ), na.rm = T)
+caps5 <- quantile (ecommerce_unique$product_related_duration, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$product_related_duration, na.rm = T)
+ecommerce_unique$product_related_duration[ecommerce_unique$product_related_duration < (qnt5[ 1 ] - H)] <- caps5[ 1 ]
+ecommerce_unique$product_related_duration[ecommerce_unique$product_related_duration > (qnt5[ 2 ] + H)] <- caps5[ 2 ]
+
+# bounce_rates
+qnt6 <- quantile (ecommerce_unique$bounce_rates, probs= c (.25 , .75 ), na.rm = T)
+caps6 <- quantile (ecommerce_unique$bounce_rates, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$bounce_rates, na.rm = T)
+ecommerce_unique$bounce_rates[ecommerce_unique$bounce_rates < (qnt6[ 1 ] - H)] <- caps6[ 1 ]
+ecommerce_unique$bounce_rates[ecommerce_unique$bounce_rates > (qnt6[ 2 ] + H)] <- caps6[ 2 ]
+
+# exit_rates
+qnt7 <- quantile (ecommerce_unique$exit_rates, probs= c (.25 , .75 ), na.rm = T)
+caps7 <- quantile (ecommerce_unique$exit_rates, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$exit_rates, na.rm = T)
+ecommerce_unique$exit_rates[ecommerce_unique$exit_rates < (qnt7[ 1 ] - H)] <- caps7[ 1 ]
+ecommerce_unique$exit_rates[ecommerce_unique$exit_rates > (qnt7[ 2 ] + H)] <- caps7[ 2 ]
+
+# page_values
+qnt8 <- quantile (ecommerce_unique$page_values, probs= c (.25 , .75 ), na.rm = T)
+caps8 <- quantile (ecommerce_unique$page_values, probs= c (.05 , .95 ), na.rm = T)
+H <- 1.5 * IQR (ecommerce_unique$page_values, na.rm = T)
+ecommerce_unique$page_values[ecommerce_unique$page_values < (qnt8[ 1 ] - H)] <- caps8[ 1 ]
+ecommerce_unique$page_values[ecommerce_unique$page_values > (qnt8[ 2 ] + H)] <- caps8[ 2 ]
+
+```
+
+To see the effects of the changes made, we will make another plot of boxplots to check or outliers present
+
+```{r}
+# get numerical columns in the data
+nums <- unlist(lapply(ecommerce_unique, is.numeric))
+
+# output the numeric columns in form of a dataframe
+numeric_cols <- ecommerce_unique[ , nums]
+
+# make boxplots
+par ( mfrow= c (  2, 4 ))
+for (i in 1 : length (numeric_cols)) {
+boxplot (numeric_cols[,i], main= names (numeric_cols[i]), type= "l" )
+}
+
+```
+
+From the plots, we can see there are few to no outliers in the columns containing continuos numerical data. We will not deal with outliers in categorical data to avoid causing a lot of inconsistencies. 
+
+### 8.5 Anomalies
+Anomalies are inconsistencies in the data and this can be checked for in many ways. These are rare items, events or observations which raise suspicions by differing significantly from the majority of the data.
+
+### 8.6 Data-type Conversion
+
+Columns containing discrete data(categorical data) needs to be converted to its appropriate form- factor dataype. 
+
+```{r}
+#to be revisited
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
