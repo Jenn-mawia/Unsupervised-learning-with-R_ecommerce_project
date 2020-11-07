@@ -886,7 +886,7 @@ We can now build a clustering model with kmeans. Since we already know the expec
 kmeans_model<- kmeans(ecomm_new,2) 
 ```
 
-Previewing the number of records in each cluster
+**Previewing the number of records in each cluster**
 
 ```{r}
 # number of records in each cluster
@@ -895,39 +895,38 @@ kmeans_model$size
 
 There are 2528 records in the first cluster and 9683 records in the second cluster, this sums to 12211 records which is the size of our initial data. 
 
- We can also get the value of cluster center datapoint for each variable. 
+**We can also get the value of cluster center datapoint for each variable.** 
 
 ```{r}
 # getting cluster center datapoints
 kmeans_model$centers 
 ```
 
-We can also get the cluster vector that shows the cluster where each record falls
+**We can also get the cluster vector that shows the cluster where each record falls**
 
-# Getting the cluster vector that shows the cluster where each record falls
 ```{r}
 # getting cluster vector
 kmeans_model$cluster
 
 ```
 
-We can also plot to see how various fields were distributed in the clusters and also compare the plot with the original dataset
+We can also **plot to see how various fields were distributed in the clusters** and also compare the plot with the original dataset
 
 ```{r}
 # plot to check administrative duration and informational duration in the clusters
 plot(ecomm_new[c(2,4)], col = kmeans_model$cluster)
 ```
 
-Compare the plot with the initial distribution in the data 
+**Compare the plot with the initial distribution in the data** 
 
 ```{r}
 plot(ecomm_new[c(2,4)], col = ecommerce_label)
 
 ```
 
-The distributon on the model is similar to the distribution in the dataset. 
+The distribution on the model is similar to the distribution in the dataset. 
 
-We can check the distribution on a table
+We can  **check the distribution on a table**
 
 ```{r}
 table(kmeans_model$cluster, ecommerce_label)
@@ -937,17 +936,64 @@ The result of the table shows that cluster 1 corresponds to  the above table, cl
 
 We can see that the model did not perform so well since there are a couple number of misclassifications in the matrix. We can build a hierarchical model to observe if it will perform better than kmeans model. 
 
+## 10.3 Hierarchical modeling
+
+Compute the Euclidean distance between observations using the dist function
+
 ```{r}
-
-```
-
-
-```{r}
+#compute euclidean distance
 d <- dist(ecomm_new, method = "euclidean")
-res.hc <- hclust(d, method = "average" )
-plot(res.hc, cex = 0.6, hang = -1)
+```
+
+We then build a hierachical model with the distance function and method average
+
+```{r}
+# build hierarchical model
+hier <- hclust(d, method = "ward.D" )
+```
+
+Plotting the dendrogram
+```{r}
+# plot the obtained dendrogram
+plot(hier, cex = 0.6, hang = -1)
 
 ```
+
+It looks like the first smaller cluster corresponds to revenue = FALSE, which was the cluster with a few values, while the second large cluster with many other clusters corresponds to revenue = TRUE
+
+```{r}
+# install the package and load it: install.packages('ape')
+#library(ape)
+# plot basic tree
+#plot(as.phylo(hier), cex = 0.9, label.offset = 1)
+```
+
+An alternative way to produce dendrograms is to specifically convert hclust objects into dendrograms objects. This makes it easier to truncate the dendrogram at specific points for easy interpretation
+```{r}
+# convert the hierarchical clustering object to dendrogram object
+hcd = as.dendrogram(hier)
+```
+
+Now we can truncate the original dendrogram for easy interpretation
+```{r}
+plot(cut(hcd, h = 75)$upper, main = "Upper tree of cut at h=75")
+plot(cut(hcd, h = 75)$lower[[2]], main = "Second branch of lower tree with cut at h=75")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
