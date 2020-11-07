@@ -653,8 +653,8 @@ Since our target variable is Revenue, we will investigate its relationship with 
 
 ```{r}
 # how often does a user make a purchase on the site if he/she visits administrative pages
-adm_revenue_ <- table(ecommerce_unique$administrative, ecommerce_unique$revenue)
-names(dimnames(adm_revenue)) <- c ( "admin" , "revenue" )
+adm_revenue <- table(ecommerce_unique$administrative, ecommerce_unique$revenue)
+names(dimnames(adm_revenue)) <- c("admin" , "revenue" )
 adm_revenue
 ```
 
@@ -785,39 +785,169 @@ weekend_revenue
 More revenue is generated for site visits made during weekdays
 
 
-
+### Correlation Matrix
+Find the correlations of the numerical columns and make a correlation matrix plot
 
 ```{r}
-library(ggplot2)
-ggpairs(ecommerce_unique)
+# find the correlations and round them off to 2 decimal places
+#res <- round(cor(ecommerce_unique), 2 )
+library (corrplot)
+
+#corrplot(res, type = "full", order = "hclust", tl.col = "black", tl.srt = 45 )
+
+```
+
+# 10. Implementing the solution
+
+## 10.1 Data Pre-processing
+ 
+Before we begin modelling, we must ensure that the datatypes in the data we will use are in the appropriate mode i.e. numeric. 
+
+```{r}
+# check the datat types of the columns in the data
+str(ecommerce_unique)
+```
+
+From the output, we can see that some of the fields we observed to be important during the EDA process are of character and logical types. The last 8 columns are categorical and can be converted to factor types for label encoding.
+
+**Encoding categorical variables** 
+The easiest way to do this is to convert the variables to factor datatypes and then to numeric datatypes. 
+
+```{r}
+# encoding categorical variables
+ecommerce_unique$month <- as.numeric(as.factor(ecommerce_unique$month))
+
+ecommerce_unique$operating_systems <- as.numeric(as.factor(ecommerce_unique$operating_systems))
+
+ecommerce_unique$browser <- as.numeric(as.factor(ecommerce_unique$browser))
+
+ecommerce_unique$region <- as.numeric(as.factor(ecommerce_unique$region))
+
+ecommerce_unique$traffic_type <- as.numeric(as.factor(ecommerce_unique$traffic_type))
+
+ecommerce_unique$visitor_type <- as.numeric(as.factor(ecommerce_unique$visitor_type))
+
+ecommerce_unique$weekend <- as.numeric(as.factor(ecommerce_unique$weekend))
+
+ecommerce_unique$revenue <- as.numeric(as.factor(ecommerce_unique$revenue))
+
+```
+
+Check the effect of the changes made
+
+```{r}
+# check the datatypes 
+str(ecommerce_unique)
+```
+
+All the variables are now in numeric type.
+
+**Feature Selection**
+
+We exclude our target variable from the features 
+
+```{r}
+# remove the target variable from the features
+ecommerce_new <- ecommerce_unique[, c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)]
+
+# save the target variable on a new dataframe
+ecommerce_label <- ecommerce_unique[, "revenue"]
+
+#check the top of the two dataframes
+head(ecommerce_new)
+
+head(ecommerce_label)
+```
+
+**Normalization**
+
+Normalizing the variables in the dataset is done so that no particular attribute has more impact on the clustering algorithm than others
+
+```{r}
+#normalize function
+normalize <- function(x){
+  return ((x-min(x)) / (max(x)-min(x)))
+}
+```
+
+```{r}
+#apply the function on the features and check the top of the dataset
+ecomm_new <- as.data.frame(lapply(ecommerce_new, normalize))
+
+head(ecomm_new)
+```
+
+## 10.2 Modelling with K-Means Clustering
+
+We can now build a clustering model with kmeans. Since we already know the expected number of clusters in our target field, we can specify the number of centroids,k=2(target revenue has two values TRUE and FALSE equal to two clusters)
+
+```{r}
+#modeling using kmeans, k=2
+kmeans_model<- kmeans(ecomm_new,2) 
+```
+
+Previewing the number of records in each cluster
+
+```{r}
+# number of records in each cluster
+kmeans_model$size
+```
+
+There are 2528 records in the first cluster and 9683 records in the second cluster, this sums to 12211 records which is the size of our initial data. 
+
+ We can also get the value of cluster center datapoint for each variable. 
+
+```{r}
+# getting cluster center datapoints
+kmeans_model$centers 
+```
+
+We can also get the cluster vector that shows the cluster where each record falls
+
+# Getting the cluster vector that shows the cluster where each record falls
+```{r}
+# getting cluster vector
+kmeans_model$cluster
+
+```
+
+We can also plot to see how various fields were distributed in the clusters and also compare the plot with the original dataset
+
+```{r}
+# plot to check administrative duration and informational duration in the clusters
+plot(ecomm_new[c(2,4)], col = kmeans_model$cluster)
+```
+
+Compare the plot with the initial distribution in the data 
+
+```{r}
+plot(ecomm_new[c(2,4)], col = ecommerce_label)
+
+```
+
+The distributon on the model is similar to the distribution in the dataset. 
+
+We can check the distribution on a table
+
+```{r}
+table(kmeans_model$cluster, ecommerce_label)
+```
+
+The result of the table shows that cluster 1 corresponds to  the above table, cluster 1 corresponds to revenue = FALSE and cluster 2 corresponds to revenue = TRUE
+
+We can see that the model did not perform so well since there are a couple number of misclassifications in the matrix. We can build a hierarchical model to observe if it will perform better than kmeans model. 
+
+```{r}
+
 ```
 
 
+```{r}
+d <- dist(ecomm_new, method = "euclidean")
+res.hc <- hclust(d, method = "average" )
+plot(res.hc, cex = 0.6, hang = -1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 
 
