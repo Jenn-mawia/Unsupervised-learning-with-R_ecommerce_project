@@ -135,7 +135,9 @@ colnames(ecommerce)
 ```{r}
 #checking for duplicated entries
 duplicates <- ecommerce[duplicated(ecommerce),]
-duplicates
+
+# get the number of duplicated entries in the dataframe
+count(duplicates)
 ```
 
 There is a total of 119 duplicated records in the data. We will remove them since duplicated  data may imply inaccurate reporting and thus lead to less informed decisions.
@@ -318,14 +320,6 @@ From the plots, we can see there are few to no outliers in the columns containin
 ### 8.5 Anomalies
 Anomalies are inconsistencies in the data and this can be checked for in many ways. These are rare items, events or observations which raise suspicions by differing significantly from the majority of the data.
 
-### 8.6 Data-type Conversion
-
-Columns containing discrete data(categorical data) needs to be converted to its appropriate form- factor dataype. 
-
-```{r}
-# to be revisited
-```
-
 # 9. Exploratory Data Analysis
 
 ### 9.1 Univariate Data Analysis
@@ -464,12 +458,16 @@ getmode(ecommerce_unique$visitor_type)
 
 Most users visiting the site are "Returning Visitors". These are visitors who are not new to the site. 
 
+**Weekend**
+
 ```{r}
 getmode(ecommerce_unique$weekend)
 
 ```
 
 Most users visit the site during weekdays. 
+
+**Revenue**
 
 ```{r}
 getmode(ecommerce_unique$revenue)
@@ -479,13 +477,13 @@ Most users visiting the site did not purchase and hence revenue was not made fro
 
 #### 9.1.2 Measures of Dispersion
 
-##### Find the minimum, maximum and quantiles of the columns in the data.
+##### Find the **minimum, maximum and quantiles** of the columns in the data.
 
 ```{r}
 summary(ecommerce_unique)
 ```
 
-##### Range
+##### **Range**
 
 Range is the difference between the maximum point and the minimum point in a set of data. 
 
@@ -569,7 +567,7 @@ range(ecommerce_unique$special_day)
 
 Special days range between 0 and 1. 0 being- not close to a special day and 1 means a user visited the site on a day closer to a special day such as Mother's day. 
 
-##### Interquartile Range
+##### **Interquartile Range**
 
 The interquartile range also commonly known as IQR is the range between the 1st and 3rd
 quantiles. It is the difference between the two quantiles.
@@ -623,21 +621,21 @@ IQR(ecommerce_unique$page_values)
 IQR(ecommerce_unique$special_day)
 ```
 
-##### Standard Deviation
+##### **Standard Deviation**
 
 Find the standard deviation of the various columns in the data
 ```{r}
 apply (numerical, 2 ,sd)
 ```
 
-##### Variance
+##### **Variance**
 
 Find the variance of the numerical columns
 ```{r}
 sapply (numerical, var)
 ```
 
-##### Histograms
+##### **Histograms**
 ```{r}
 par( mfrow= c ( 2 , 4 ))
 for(i in 1 : length(numerical)) {
@@ -790,12 +788,14 @@ Find the correlations of the numerical columns and make a correlation matrix plo
 
 ```{r}
 # find the correlations and round them off to 2 decimal places
-#res <- round(cor(ecommerce_unique), 2 )
+res <- round(cor(numerical), 2 )
 library (corrplot)
 
-#corrplot(res, type = "full", order = "hclust", tl.col = "black", tl.srt = 45 )
+corrplot(res, type = "full", order = "hclust", tl.col = "black", tl.srt = 45 )
 
 ```
+
+There is a high correlation between the following fields: administrative and administrative duration, informational and informational duration, product related and product related duration, bounce rates and exit rates. 
 
 # 10. Implementing the solution
 
@@ -810,7 +810,8 @@ str(ecommerce_unique)
 
 From the output, we can see that some of the fields we observed to be important during the EDA process are of character and logical types. The last 8 columns are categorical and can be converted to factor types for label encoding.
 
-**Encoding categorical variables** 
+**Encoding categorical variables**
+
 The easiest way to do this is to convert the variables to factor datatypes and then to numeric datatypes. 
 
 ```{r}
@@ -953,6 +954,7 @@ hier <- hclust(d, method = "ward.D" )
 ```
 
 Plotting the dendrogram
+
 ```{r}
 # plot the obtained dendrogram
 plot(hier, cex = 0.6, hang = -1)
@@ -975,18 +977,47 @@ hcd = as.dendrogram(hier)
 ```
 
 Now we can truncate the original dendrogram for easy interpretation
+
 ```{r}
 plot(cut(hcd, h = 75)$upper, main = "Upper tree of cut at h=75")
 plot(cut(hcd, h = 75)$lower[[2]], main = "Second branch of lower tree with cut at h=75")
 ```
 
+# 11. Challenging the solution
 
+We can challenge the solution by using the DBSCAN Clustering method and checking to see ow well it performs. 
 
+```{r}
+library("dbscan")
 
+db<-dbscan(ecomm_new,eps=1,MinPts = 14)
 
+print(db)
 
+```
 
+After trying out different values for the parameters, the minimum number of clusters obtained is 11 clusters at minimum points=14 and eps=1. 
 
+We can make a **plot of the clusters**
+
+```{r}
+hullplot(ecomm_new,db$cluster)
+
+```
+
+# 11. Follow up questions
+
+### a). Did we have the right data?
+
+Yes we had the right data to answer the research question at hand.
+
+### b). Do we need other data to answer our question?
+
+It would be desirable to have more variables included that can help improve the predictive power of the model. This could be variables such as the types of products that lead to revenue earnings for the ecommerce company.
+
+### c). Did we have the right question?
+
+The research question was specific, appropriate and in line with our needs and the data available.
 
 
 
