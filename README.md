@@ -40,7 +40,7 @@ Find a bug(or undesired results) ? do not hesitate to reach out
 
 
 ## License
-[MIT](https://github.com/Jenn-mawia/advertising-project-using-R/blob/main/LICENSE)
+[MIT](https://github.com/Jenn-mawia/Unsupervised-learning-with-R_ecommerce_project/blob/main/LICENSE)
 
 
 Copyright (c) [2020] 
